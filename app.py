@@ -12,8 +12,40 @@ poly = load(open('poly.pkl', 'rb'))
 sc = load(open('scalar.pkl', 'rb'))
 
 
-@app.route('/',methods=["Get"])
+
+@app.route('/', methods=["GET"])
 def predict():
+    """House Price Prediction
+    ...
+
+    # Your parameter definitions and documentation here
+
+    responses:
+        200:
+            description: The output values
+    """
+    try:
+        i1 = float(request.args.get('House Age'))
+        i2 = float(request.args.get('Distance_to_the_nearest_MRT_station'))
+        i3 = float(request.args.get('number_of_convenience_stores'))
+        i4 = float(request.args.get('Latitude'))
+        i5 = float(request.args.get('Longitude'))
+
+        arr = np.array([[i1, i2, i3, i4, i5]])
+        arr = poly.transform(arr)
+        scaled_arr = sc.transform(arr)
+        p = round(loaded_model.predict(scaled_arr)[0], 2)
+        return "Price of the house per unit area: " + str(p)
+    except (ValueError, TypeError) as e:
+        return "Invalid input values. Please provide valid numeric inputs."
+
+if __name__ == '__main__':
+    app.run()
+
+
+
+# @app.route('/',methods=["Get"])
+# def predict():
 
     """House Price Prediction
     Note: Only for houses with Latitude Ranging from: 24.93 - 24.97 , Longitude: 121.47 - 121.54
@@ -48,22 +80,22 @@ def predict():
           200:
               description: The output values
     """
-    l=[]
-    i1=request.args.get('House Age')
-    l.append(i1)
-    i2=request.args.get('Distance_to_the_nearest_MRT_station')
-    l.append(i2)
-    i3=request.args.get('number_of_convenience_stores')
-    l.append(i3)
-    i4=request.args.get('Latitude')
-    l.append(i4)
-    i5=request.args.get('Longitude')
-    l.append(i5)
-    arr = np.array([l])
-    arr = poly.transform(arr)
-    scaled_arr = sc.transform(arr)
-    p = round(loaded_model.predict(scaled_arr)[0][0],2)
-    return "Price of the house per unit area: "+str(p)
+#     l=[]
+#     i1=request.args.get('House Age')
+#     l.append(i1)
+#     i2=request.args.get('Distance_to_the_nearest_MRT_station')
+#     l.append(i2)
+#     i3=request.args.get('number_of_convenience_stores')
+#     l.append(i3)
+#     i4=request.args.get('Latitude')
+#     l.append(i4)
+#     i5=request.args.get('Longitude')
+#     l.append(i5)
+#     arr = np.array([l])
+#     arr = poly.transform(arr)
+#     scaled_arr = sc.transform(arr)
+#     p = round(loaded_model.predict(scaled_arr)[0][0],2)
+#     return "Price of the house per unit area: "+str(p)
 
 
 
@@ -73,5 +105,5 @@ def predict():
 
 
 
-if __name__=='__main__':
-    app.run()
+# if __name__=='__main__':
+#     app.run()
