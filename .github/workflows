@@ -1,0 +1,42 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Replace with your deployment branch if different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check for changes in "templates" directory
+        id: check-changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^templates/'; then
+            echo "Changes detected in the 'templates' directory."
+          else
+            echo "No changes detected in the 'templates' directory. Skipping deployment."
+            exit 78  # Skip the subsequent steps
+          fi
+
+      - name: Copy templates to root
+        if: steps.check-changes.outcome == 'success'
+        run: |
+          # Copy the contents of the "templates" subdirectory to the root directory
+          cp -r templates/* .
+
+      - name: Build and Deploy
+        if: steps.check-changes.outcome == 'success'
+        run: |
+          # Configure Git user information using GitHub Actions environment variables
+          git config --local user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --local user.name "${{ github.actor }}"
+
+          # Deploy to GitHub Pages
+          git add .
+          git commit -m "Deploy to GitHub Pages"
+          git push
